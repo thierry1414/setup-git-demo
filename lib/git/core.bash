@@ -22,8 +22,8 @@ check_git_repository() {
 }
 
 # get current git author
-# usage: get_current_git_author
-get_current_git_author() {
+# usage: get_current_git_user
+get_current_git_user() {
   echo "$(git config user.name) <$(git config user.email)>"
 }
 

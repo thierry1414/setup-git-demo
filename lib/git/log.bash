@@ -29,7 +29,7 @@ list_commits() {
       if [[ "$OPTARG" == "me" ]]; then
         unset args[$OPTIND-2]
         unset args[$OPTIND-3]
-        args+=(--$opt "$(get_current_git_author)")
+        args+=(--$opt "$(get_current_git_user)")
       fi
       ;;
     esac
