@@ -1,8 +1,8 @@
 if [ -n "$__LIB_CORE_LOG__" ]; then
   return
 fi
-
 readonly __LIB_CORE_LOG__=true
+
 readonly NO_COLOR="\033[0m"
 readonly YELLOW="\033[0;33m"
 
