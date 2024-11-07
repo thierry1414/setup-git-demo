@@ -17,7 +17,7 @@ check_prerequisites() {
 }
 
 check_status() {
-  if has_sequencer; then
+  if has_sequencer || revision_exists REVERT_HEAD || revision_exists CHERRY_PICK_HEAD; then
     error "a revert or a cherry-pick sequence in progress" 0
     hint "complete or abort revert/cherry-pick sequence first to proceed."
     fatal "auto-revert failed" $RET_GENERIC_ERROR
