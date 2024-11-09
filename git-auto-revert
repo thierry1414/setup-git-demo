@@ -19,13 +19,13 @@ check_prerequisites() {
 check_status() {
   if has_sequencer || revision_exists REVERT_HEAD || revision_exists CHERRY_PICK_HEAD; then
     error "a revert or a cherry-pick sequence in progress" 0
-    hint "complete or abort revert/cherry-pick sequence first to proceed."
+    hint "complete or abort revert/cherry-pick sequence first to proceed." >&2
     fatal "auto-revert failed" $RET_GENERIC_ERROR
   fi
 
   if has_staged_changes || has_unstaged_changes; then
     error "your local changes would be overwritten by auto-revert." 0
-    hint "commit your changes or stash them to proceed."
+    hint "commit your changes or stash them to proceed." >&2
     fatal "auto-revert failed" $RET_GENERIC_ERROR
   fi
 }
@@ -369,16 +369,19 @@ revert() {
     revert_opts+=(--no-edit)
   fi
 
-  git revert "${revert_opts[@]}" ${commit_hashes[*]} >/dev/null
+  local revert_err
+  local revert_result
 
-  local revert_result=$?
+  revert_err="$(git -c color.advice=always revert "${revert_opts[@]}" ${commit_hashes[*]} 2>&1 >/dev/null)"
+  revert_result=$?
+
   skipped_commit_hashes=()
 
   if [ $revert_result -ne 0 ] && [ "$auto_skip_empty" == "true" ]; then
     while [ $revert_result -ne 0 ] && is_skippable; do
       local next_todo=$(get_next_todo)
 
-      git revert --skip >/dev/null
+      revert_err="$(git -c color.advice=always revert --skip 2>&1 >/dev/null)"
       revert_result=$?
 
       local todo_parts
@@ -410,10 +413,11 @@ revert() {
       hint "use \"git revert --continue\" or \"git commit\" to commit the changes"
     fi
   else
+    printf "${revert_err%'\n'}\n\n" >&2
     error "unable to revert" 0
     if has_sequencer && (has_staged_changes || has_unstaged_changes); then
-      hint "fix the conflicts and use \"git revert --continue\" to continue the revert operation manually"
-      hint "or use \"git revert --abort\" to cancel the revert operation"
+      hint "fix the conflicts and use \"git revert --continue\" to continue the revert operation manually" >&2
+      hint "or use \"git revert --abort\" to cancel the revert operation" >&2
     fi
     fatal "auto-revert failed" $RET_GENERIC_ERROR
   fi
