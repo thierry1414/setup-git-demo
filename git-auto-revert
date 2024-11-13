@@ -414,7 +414,9 @@ revert() {
       hint "use \"git revert --continue\" or \"git commit\" to commit the changes"
     fi
   else
-    printf "${revert_err%'\n'}\n\n" >&2
+    if [ -n "$revert_err" ]; then
+      printf "${revert_err%'\n'}\n\n" >&2
+    fi
     error "unable to revert" 0
     if (has_sequencer || [ ${#commit_hashes[@]} -eq 1 ]) && (has_staged_changes || has_unstaged_changes); then
       hint "fix the conflicts and continue the revert operation manually" >&2
