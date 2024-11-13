@@ -393,7 +393,7 @@ revert() {
 
   local numreverted=$((${#commit_hashes[@]} - ${#skipped_commit_hashes[@]}))
 
-  if [ $numreverted -eq 0 ]; then
+  if [ $numreverted -eq 0 ] || ([ ${#commit_hashes[@]} -eq 1 ] && [ -z "$revert_err" ] && [ $revert_result -ne 0 ]); then
     echo "All matched commits are skipped. Nothing to revert"
   elif [ $revert_result -eq 0 ]; then
     if [ "$single_commit" == "true" ]; then
