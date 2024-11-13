@@ -234,7 +234,7 @@ find_commits() {
     local revision_range="$rev_start..$rev_end"
   fi
 
-  local find_commits_opts=()
+  local find_commits_opts=(--no-merges)
 
   if [[ ${#grep[@]} -gt 0 ]]; then
     for grep_val in "${grep[@]}"; do
