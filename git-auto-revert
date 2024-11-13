@@ -315,7 +315,8 @@ build_commit_message() {
 }
 
 is_skippable() {
-  has_sequencer && ! revision_exists REVERT_HEAD && ! has_staged_changes && ! has_unstaged_changes
+  local next_todo=$(get_next_todo)
+  [ "$todo" != "$next_todo" ] && has_sequencer && ! has_staged_changes && ! has_unstaged_changes
 }
 
 is_skipped() {
@@ -379,13 +380,13 @@ revert() {
 
   if [ $revert_result -ne 0 ] && [ "$auto_skip_empty" == "true" ]; then
     while [ $revert_result -ne 0 ] && is_skippable; do
-      local next_todo=$(get_next_todo)
+      todo=$(get_next_todo)
 
       revert_err="$(git -c color.advice=always revert --skip 2>&1 >/dev/null)"
       revert_result=$?
 
       local todo_parts
-      IFS=' ' read -r -a todo_parts <<<"$next_todo"
+      IFS=' ' read -r -a todo_parts <<<"$todo"
       skipped_commit_hashes+=($(resolve_revision ${todo_parts[1]}))
     done
   fi
