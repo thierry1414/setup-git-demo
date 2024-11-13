@@ -417,7 +417,7 @@ revert() {
     printf "${revert_err%'\n'}\n\n" >&2
     error "unable to revert" 0
     if has_sequencer && (has_staged_changes || has_unstaged_changes); then
-      hint "fix the conflicts and use \"git revert --continue\" to continue the revert operation manually" >&2
+      hint "fix the conflicts and continue the revert operation manually" >&2
       hint "or use \"git revert --abort\" to cancel the revert operation" >&2
     fi
     fatal "auto-revert failed" $RET_GENERIC_ERROR
