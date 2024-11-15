@@ -47,12 +47,19 @@ has_staged_changes() {
   local ret=$?
   ! [ $ret -eq 0 ]
 }
+
 # check if current git repository has unstaged changes. returns 0 if so, non-zero otherwise
 # usage: has_unstaged_changes
 has_unstaged_changes() {
   git diff --exit-code >/dev/null 2>&1
   local ret=$?
   ! [ $ret -eq 0 ]
+}
+
+# check if current git repository has unresolved conflicts. returns 0 if so, non-zero otherwise
+# usage: has_unresolved_conflicts
+has_unresolved_conflicts() {
+  [ -n "$(git diff --name-only --diff-filter=U --relative 2>/dev/null)" ]
 }
 
 # check if current git repository has a sequencer. this indicates that there's an ongoing revert or cherry-pick
