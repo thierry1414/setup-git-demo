@@ -206,7 +206,7 @@ parse_options() {
       error_missing_opt_value "$OPTARG"
       ;;
     *)
-      error_unknown_opt "$OPTARG"
+      error_unknown_opt "$OPTARG" "$(print_usage)"
       ;;
     esac
   done

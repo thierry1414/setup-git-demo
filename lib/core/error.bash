@@ -24,7 +24,7 @@ function fail() {
     exit_code=1
   fi
 
-  echo "$level: $message" >&2
+  printf "$level: $message"'\n' >&2
 
   if [ $exit_code -ne 0 ]; then
     exit "$exit_code"
@@ -74,6 +74,14 @@ function error_missing_opt_value() {
 # usage: error_unknown_opt opt_name
 function error_unknown_opt() {
   local opt="$1"
+  local usage="$2"
 
-  error "unknown $(get_option_type_name $opt) \`$opt'" "$RET_ILLEGAL_OPTION"
+  local message="unknown $(get_option_type_name $opt) \`$opt'"
+
+  if [ -n "$usage" ]; then
+    message+='\n'
+    message+="$usage"
+  fi
+
+  error "$message" "$RET_ILLEGAL_OPTION"
 }
