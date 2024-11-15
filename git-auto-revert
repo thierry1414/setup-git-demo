@@ -40,6 +40,7 @@ print_usage() {
     -e, --[no-]edit       edit the commit message
     --[no-]auto-skip-empty
                           automatically skip commits which have no change to be reverted
+    -v, --[no-]verbose    be verbose
     --grep=<pattern>      limit the commits to be reverted to ones with a log message that match the specified pattern. required if commit message tag is not specified
     --author=<pattern>    author to filter commits to revert. set to \"me\" to revert only the commits authored by the current user
     --committer=<pattern> committer to filter commits to revert. set to \"me\" to revert only the commits comitted by the current user
@@ -99,8 +100,8 @@ parse_options() {
   single_commit=false
   no_commit=false
   edit=false
+  verbose=false
   auto_skip_empty=true
-
   all_match=false
   invert_grep=false
   regexp_ignore_case=false
@@ -116,11 +117,11 @@ parse_options() {
     OPTIND=1
   fi
 
-  local long_opts="help,single-commit,message:,no-commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,grep:,author:,committer:"
+  local long_opts="help,single-commit,message:,no-commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,verbose,no-verbose,grep:,author:,committer:"
   long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:,since-tag:,after-tag:,until-tag:,before-tag:"
   long_opts+=",all-match,invert-grep,regexp-ignore-case,basic-regexp,extended-regexp,fixed-strings,perl-regexp"
 
-  while get_options "hsm:neiEFP" "$long_opts" opt "$@"; do
+  while get_options "hsm:neviEFP" "$long_opts" opt "$@"; do
     case "$opt" in
     h | help)
       print_usage
@@ -146,6 +147,12 @@ parse_options() {
       ;;
     no-auto-skip-empty)
       auto_skip_empty=false
+      ;;
+    v | verbose)
+      verbose=true
+      ;;
+    no-verbose)
+      verbose=false
       ;;
     grep)
       grep+=("$OPTARG")
@@ -351,6 +358,14 @@ squash_commits() {
   commit
 }
 
+print_commits() {
+  local commits=$@
+
+  for commit in ${commits[@]}; do
+    git log -n 1 "$commit" --format="%C(auto)[%h] (%an <%ae>): %s"
+  done
+}
+
 revert() {
   if [ -z "$commit_hashes" ]; then
     error "no matching commits found. nothing to do" $RET_GENERIC_ERROR
@@ -394,10 +409,35 @@ revert() {
   local numreverted=$((${#commit_hashes[@]} - ${#skipped_commit_hashes[@]}))
 
   if [ $numreverted -eq 0 ] || ([ ${#commit_hashes[@]} -eq 1 ] && [ -z "$revert_err" ] && [ $revert_result -ne 0 ]); then
+    if [ "$verbose" == "true" ]; then
+      echo "The following commits are skipped:"
+      print_commits ${commit_hashes[@]}
+      echo
+    fi
+
     echo "All matched commits are skipped. Nothing to revert"
   elif [ $revert_result -eq 0 ]; then
     if [ "$single_commit" == "true" ]; then
       squash_commits "$base_commit"
+    fi
+
+    if [ "$verbose" == "true" ]; then
+      local reverted_commit_hashes=()
+      for commit in ${commit_hashes[@]}; do
+        if ! is_skipped "$commit"; then
+          reverted_commit_hashes+=("$commit")
+        fi
+      done
+
+      echo "The following commits are reverted:"
+      print_commits ${reverted_commit_hashes[@]}
+      echo
+
+      if [ ${#skipped_commit_hashes[@]} -gt 0 ]; then
+        echo "The following commits are skipped:"
+        print_commits ${skipped_commit_hashes[@]}
+        echo
+      fi
     fi
 
     printf "Successfully reverted $numreverted commit(s)"
