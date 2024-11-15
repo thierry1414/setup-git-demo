@@ -458,7 +458,7 @@ revert() {
       printf "${revert_err%'\n'}\n\n" >&2
     fi
     error "unable to revert" 0
-    if (has_sequencer || [ ${#commit_hashes[@]} -eq 1 ]) && has_unresolved_conflicts; then
+    if has_unresolved_conflicts; then
       hint "fix the conflicts and continue the revert operation manually" >&2
       hint "or use \"git revert --abort\" to cancel the revert operation" >&2
     fi
