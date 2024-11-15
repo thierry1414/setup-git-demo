@@ -67,7 +67,7 @@ list_commits_by_tag() {
     esac
   done
 
-  local grep="^$tag\b"
+  local grep="^$tag:\?[^\w()_0-9]"
 
   list_commits "$revision_range" --grep "$grep" "${args[@]}"
 }
