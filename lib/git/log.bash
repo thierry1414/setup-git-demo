@@ -39,7 +39,7 @@ list_commits() {
 }
 
 # lists git commits by tag
-# usage: list_commits <tag> [<revision-range>] [--conventional] [--author=me|<pattern>] [--committer=me|<pattern>] [<git-log-options>] [[--] <path>…​]
+# usage: list_commits <tag> [<revision-range>] [--author=me|<pattern>] [--committer=me|<pattern>] [<git-log-options>] [[--] <path>…​]
 list_commits_by_tag() {
   if [[ -z "$1" ]] || [[ "$1" == --* ]]; then
     return 1
@@ -59,20 +59,15 @@ list_commits_by_tag() {
   local args=("${args_to_parse[@]}")
 
   reset_options
-  while get_options "" "grep:,conventional" opt "${args_to_parse[@]}"; do
+  while get_options "" "grep:" opt "${args_to_parse[@]}"; do
     case "$opt" in
     grep)
       return 2
       ;;
-    conventional)
-      local conventional=true
-      ;;
     esac
   done
 
-  if [[ "$conventional" != "true" ]]; then
-    local grep="^$tag\b"
-  fi
+  local grep="^$tag\b"
 
   list_commits "$revision_range" --grep "$grep" "${args[@]}"
 }
