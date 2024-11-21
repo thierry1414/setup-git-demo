@@ -41,6 +41,7 @@ print_options() {
     -s, --single-commit   apply all the changes within a single commit
     -m, --message         commit message for the single commit. ignored if --single-commit is not enabled
     -n, --no-commit       don't automatically commit
+    --commit              opposite of --no-commit
     -e, --[no-]edit       edit the commit message
     --[no-]auto-skip-empty
                           automatically skip commits which introduce no change
@@ -161,7 +162,7 @@ parse_options() {
     OPTIND=1
   fi
 
-  local long_opts="help,single-commit,message:,no-commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,verbose,no-verbose,grep:,author:,committer:"
+  local long_opts="help,single-commit,message:,no-commit,commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,verbose,no-verbose,grep:,author:,committer:"
   long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:,since-tag:,after-tag:,until-tag:,before-tag:"
   long_opts+=",all-match,invert-grep,regexp-ignore-case,basic-regexp,extended-regexp,fixed-strings,perl-regexp"
 
@@ -179,6 +180,9 @@ parse_options() {
       ;;
     n | no-commit)
       no_commit=true
+      ;;
+    commit)
+      no_commit=false
       ;;
     e | edit)
       edit=true
