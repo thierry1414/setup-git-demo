@@ -126,3 +126,33 @@ get_next_todo() {
   local gitdir="$(get_git_dir)"
   echo "$(head -n 1 "$gitdir/sequencer/todo")"
 }
+
+readonly DEFAULT_GIT_EDITOR=vi
+
+# find editor used by git
+# usage find_git_editor
+find_git_editor() {
+  local config_editor="$(git config core.editor)"
+
+  if [[ -n "$config_editor" ]]; then
+    echo "$config_editor"
+    return
+  fi
+
+  if [[ -n "$GIT_EDITOR" ]]; then
+    echo "$GIT_EDITOR"
+    return
+  fi
+
+  if [[ -n "$VISUAL" ]]; then
+    echo "$VISUAL"
+    return
+  fi
+
+  if [[ -n "$EDITOR" ]]; then
+    echo "$EDITOR"
+    return
+  fi
+
+  echo "$DEFAULT_GIT_EDITOR"
+}

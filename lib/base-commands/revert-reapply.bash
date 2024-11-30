@@ -425,7 +425,7 @@ commit() {
     commit_opts+=(--no-edit)
   fi
 
-  local editor="$(git config core.editor)"
+  local editor="$(find_git_editor)"
   local git_config=(-c "color.advice=always" -c "core.editor=$editor >$(tty)")
 
   git "${git_config[@]}" commit -m "$message" "${commit_opts[@]}" >/dev/null
@@ -478,7 +478,7 @@ do_revert_reapply() {
     command_opts+=(--no-edit)
   fi
 
-  local editor="$(git config core.editor)"
+  local editor="$(find_git_editor)"
 
   local command_err
   local command_result
