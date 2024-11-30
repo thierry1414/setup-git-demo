@@ -72,8 +72,8 @@ list_commits_by_tag() {
   list_commits "$revision_range" --grep "$grep" "${args[@]}"
 }
 
-# finds initial commit of the current tree and returns its hash
-# usage: find_initial_commit
-find_initial_commit() {
+# finds the root commit of the current tree and returns its hash
+# usage: find_root_commit
+find_root_commit() {
   echo "$(git log --reverse --pretty="%H" | head -1)"
 }

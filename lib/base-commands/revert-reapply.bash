@@ -286,7 +286,7 @@ find_commits() {
 
   if [[ -n "$rev_start" ]] || [[ -n "$rev_end" ]]; then
     if [[ -z "$rev_start" ]]; then
-      local rev_start="$(find_initial_commit)"
+      local rev_start="$(find_root_commit)"
     fi
 
     local revision_range="$rev_start..$rev_end"
