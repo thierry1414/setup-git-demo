@@ -72,7 +72,7 @@ list_commits_by_tag() {
   list_commits "$revision_range" --grep "$grep" "${args[@]}"
 }
 
-# finds the root commit of the current tree and returns its hash
+# finds the root commit reachable from current HEAD
 # usage: find_root_commit
 find_root_commit() {
   echo "$(git log --reverse --pretty="%H" | head -1)"
