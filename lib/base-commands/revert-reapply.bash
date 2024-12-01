@@ -9,7 +9,6 @@ readonly __DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__=$(dirname -- "${BASH_SOURCE[0]
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/core.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/log.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/revision.bash"
-. "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/tag.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../util/get_options.bash"
 
 readonly ACTION_AUTO_REVERT="AUTO_REVERT"
@@ -54,13 +53,9 @@ print_options() {
     --until=<date>, --before=<date>       
                           limit commits selected to the ones that are older than a specific date
     --since-commit=<commit>, --after-commit=<commit>
-                          limit commits selected to the ones that are more recent than the specified commit (excluding specified commit)
+                          limit commits selected to the ones that are more recent than the specified revision (excluding specified revision)
     --until-commit=<commit>, --before-commit=<commit>
-                          limit commits selected to the ones that are older than the specified commit (including specified commit)
-    --since-tag=<tag>, --after-tag=<tag>
-                          limit commits selected to the ones that are more recent than the specified Git tag (excluding the commit specified tag points to)
-    --until-tag=<tag>, --before-tag=<tag>
-                          limit commits selected to the ones that are older than the specified Git tag (including the commit specified tag points to)
+                          limit commits selected to the ones that are older than the specified revision (including specified revision)
 
 Options related to limiting patterns (ignored if no pattern is specified with --grep=<pattern>)
     --all-match           limit the commits selected to ones that match all given --grep, instead of ones that match at least one
@@ -120,14 +115,6 @@ validate_options() {
     error "<commit-message-tag> must consist of only letters, digits, hypens, underscores and parentheses" $RET_ILLEGAL_OPTION
   fi
 
-  if [ -n "$since_commit" ] && [ -n "$since_tag" ]; then
-    error "--since-commit or --after-commit cannot be used with --since-tag or --after-tag" $RET_ILLEGAL_OPTION
-  fi
-
-  if [ -n "$until_commit" ] && [ -n "$until_tag" ]; then
-    error "--until-commit or --before-commit cannot be used with --until-tag or --before-tag" $RET_ILLEGAL_OPTION
-  fi
-
   if [ "$single_commit" == "true" ] && [ -z "$single_commit_message" ] && [ -z "$tag" ]; then
     error "--message is required when reverting in a single commit and <commit-message-tag> is not specified" $RET_ILLEGAL_OPTION
   fi
@@ -163,7 +150,7 @@ parse_options() {
   fi
 
   local long_opts="help,single-commit,message:,no-commit,commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,verbose,no-verbose,grep:,author:,committer:"
-  long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:,since-tag:,after-tag:,until-tag:,before-tag:"
+  long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:"
   long_opts+=",all-match,invert-grep,regexp-ignore-case,basic-regexp,extended-regexp,fixed-strings,perl-regexp"
   local optstring="hsm:neviEFP"
   
@@ -245,12 +232,6 @@ parse_options() {
     until-commit | before-commit)
       until_commit="$OPTARG"
       ;;
-    since-tag | after-tag)
-      since_tag="$OPTARG"
-      ;;
-    until-tag | before-tag)
-      until_tag="$OPTARG"
-      ;;
     :)
       error_missing_opt_value "$OPTARG"
       ;;
@@ -270,19 +251,11 @@ find_commits() {
   if [[ -n "$since_commit" ]]; then
     revision_exists "$since_commit" || error "unknown revision: $since_commit"
     local rev_start="$since_commit"
-  elif [[ -n "$since_tag" ]]; then
-    revision_exists "$since_tag" || error "unknown revision: $since_tag"
-    check_tag "$since_tag" || error "not a tag: $since_tag"
-    local rev_start="$(resolve_revision "$since_tag")"
   fi
 
   if [[ -n "$until_commit" ]]; then
     revision_exists "$until_commit" || error "unknown revision: $until_commit"
     local rev_end="$until_commit"
-  elif [[ -n "$until_tag" ]]; then
-    revision_exists "$until_tag" || error "unknown revision: $until_tag"
-    check_tag "$since_tag" || error "not a tag: $until_tag"
-    local rev_end="$(resolve_revision "$until_tag")"
   fi
 
   if [[ -n "$rev_start" ]] || [[ -n "$rev_end" ]]; then
