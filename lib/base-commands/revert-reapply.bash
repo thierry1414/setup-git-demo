@@ -165,8 +165,9 @@ parse_options() {
   local long_opts="help,single-commit,message:,no-commit,commit,edit,no-edit,auto-skip-empty,no-auto-skip-empty,verbose,no-verbose,grep:,author:,committer:"
   long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:,since-tag:,after-tag:,until-tag:,before-tag:"
   long_opts+=",all-match,invert-grep,regexp-ignore-case,basic-regexp,extended-regexp,fixed-strings,perl-regexp"
-
-  while get_options "hsm:neviEFP" "$long_opts" opt "$@"; do
+  local optstring="hsm:neviEFP"
+  
+  while get_options "$optstring" "$long_opts" opt "$@"; do
     case "$opt" in
     h | help)
       print_usage
