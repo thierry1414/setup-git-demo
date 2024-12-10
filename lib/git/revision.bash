@@ -3,12 +3,13 @@ if [ -n "$__LIB_GIT_REVISION__" ]; then
 fi
 readonly __LIB_GIT_REVISION__=true
 
-# echoes the commit hash of the speficied revision
-# usage: resolve_revision <revision>
+# echoes the commit hash (or the commit in specified <pretty> format) of the speficied revision
+# usage: resolve_revision <revision> [<pretty>]
 resolve_revision() {
   local revision="$1"
+  local pretty="${2:-%H}"
 
-  echo "$(git show -s --pretty="%H" "$revision" 2>/dev/null)"
+  echo "$(git show -s --pretty="$pretty" "$revision" 2>/dev/null)"
 }
 
 # checks if revision exists, returns 0 if so, otherwise non-zero

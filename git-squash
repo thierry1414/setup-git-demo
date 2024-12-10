@@ -18,8 +18,14 @@ abort_squash() {
   local current_head="$(resolve_revision "HEAD")"
 
   if [[ "$current_head" != "$original_head" ]]; then
-    git reset "$original_head" --hard >/dev/null
-    echo "squash aborted"
+    git reset "$original_head" --hard >/dev/null 2>&1
+
+    if [[ $? -eq 0 ]]; then
+      echo "squash aborted"
+    else
+      error "unable to abort squash" 0
+      hint "reset to commit \'$original_head_short\' to recover the working tree state before squash"
+    fi
   fi
 }
 
@@ -39,6 +45,7 @@ check_prerequisites() {
 
 set_up() {
   original_head="$(resolve_revision "HEAD")"
+  original_head_short="$(resolve_revision "$original_head" "%h")"
 }
 
 check_repository_status() {
