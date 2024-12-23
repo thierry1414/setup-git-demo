@@ -250,11 +250,13 @@ parse_options() {
 find_commits() {
   if [[ -n "$since_commit" ]]; then
     revision_exists "$since_commit" || error "unknown revision: $since_commit"
+    is_revision_reachable "$since_commit" || fatal "unreachable revision: $since_commit" $RET_GENERIC_ERROR
     local rev_start="$since_commit"
   fi
 
   if [[ -n "$until_commit" ]]; then
     revision_exists "$until_commit" || error "unknown revision: $until_commit"
+    is_revision_reachable "$until_commit" || fatal "unreachable revision: $until_commit" $RET_GENERIC_ERROR
     local rev_end="$until_commit"
   fi
 
