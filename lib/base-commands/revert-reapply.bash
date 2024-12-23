@@ -110,7 +110,7 @@ validate_options() {
     error "either a <commit-message-tag> or --grep must be specified" $RET_ILLEGAL_OPTION
   fi
 
-  local tag_regex=^[\(\)a-z0-9_-]+$
+  local tag_regex=^[\(\)a-zA-Z0-9_-]+$
   if [ -n "$tag" ] && [[ ! $tag =~ $tag_regex ]]; then
     error "<commit-message-tag> must consist of only letters, digits, hypens, underscores and parentheses" $RET_ILLEGAL_OPTION
   fi
