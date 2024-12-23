@@ -572,7 +572,7 @@ do_revert_reapply() {
     if [ -n "$command_err" ]; then
       printf "${command_err%'\n'}\n\n" >&2
     fi
-    error "unable to revert" 0
+    error "unable to $action_name" 0
     if has_unresolved_conflicts; then
       hint "fix the conflicts and continue the $git_command_name operation manually" >&2
       hint "or use \"git $git_command_name --abort\" to cancel the $action_name operation" >&2
