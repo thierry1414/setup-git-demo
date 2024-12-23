@@ -181,8 +181,9 @@ find_git_editor() {
 }
 
 # check if a given revision is reachable from HEAD
-# usage: is_revision_reachable <revision>
+# usage: is_revision_reachable <revision> [<from_revision>]
 is_revision_reachable() {
   local revision="$1"
-  git merge-base --is-ancestor "$revision" HEAD >/dev/null
+  local from_revision="${2:-HEAD}"
+  git merge-base --is-ancestor "$revision" "$from_revision" >/dev/null
 }

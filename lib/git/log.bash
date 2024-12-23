@@ -72,8 +72,9 @@ list_commits_by_tag() {
   list_commits "$revision_range" --grep "$grep" "${args[@]}"
 }
 
-# finds the root commit reachable from current HEAD
-# usage: find_root_commit
+# finds the root commit reachable from a specific revision
+# usage: find_root_commit [<from_revision>]
 find_root_commit() {
-  echo "$(git log --reverse --pretty="%H" | head -1)"
+  local from_revision="${1:-HEAD}"
+  echo "$(git log "$from_revision" --reverse --pretty="%H" | head -1)"
 }

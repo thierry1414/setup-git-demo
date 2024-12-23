@@ -36,8 +36,15 @@ check_repository_status() {
 # usage: print_options
 # *intended for internal usage within this file
 print_options() {
-  echo "
-    -s, --single-commit   apply all the changes within a single commit
+  echo
+
+  if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ]; then
+    echo "    --source              source revision that commits are searched from
+    --[no-]decorate-messages
+                          add decoration to auto-generated commit messages to indicate they are reapplied"
+  fi
+
+  echo "    -s, --single-commit   apply all the changes within a single commit
     -m, --message         commit message for the single commit. ignored if --single-commit is not enabled
     -n, --no-commit       don't automatically commit
     --commit              opposite of --no-commit
@@ -153,12 +160,25 @@ parse_options() {
   long_opts+=",since:,after:,until:,before:,since-commit:,after-commit:,until-commit:,before-commit:"
   long_opts+=",all-match,invert-grep,regexp-ignore-case,basic-regexp,extended-regexp,fixed-strings,perl-regexp"
   local optstring="hsm:neviEFP"
-  
+
+  if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ]; then
+    long_opts+=",source,decorate-messages,no-decorate-messages"
+  fi
+
   while get_options "$optstring" "$long_opts" opt "$@"; do
     case "$opt" in
     h | help)
       print_usage
       exit 0
+      ;;
+    source)
+      source="$OPTARG"
+      ;;
+    decorate-messages)
+      decorate_messages=true
+      ;;
+    no-decorate-messages)
+      decorate_messages=false
       ;;
     s | single-commit)
       single_commit=true
@@ -248,24 +268,36 @@ parse_options() {
 # usage: find_commits
 # *intended for internal usage within this file
 find_commits() {
+  local source_revision=HEAD
+
+  if [[ -n "$source" ]]; then
+    source_revision="$source"
+  fi
+
+  local revision_range
+
   if [[ -n "$since_commit" ]]; then
     revision_exists "$since_commit" || error "unknown revision: $since_commit"
-    is_revision_reachable "$since_commit" || fatal "unreachable revision: $since_commit" $RET_GENERIC_ERROR
+    is_revision_reachable "$since_commit" "$source_revision" || fatal "unreachable revision: $since_commit" $RET_GENERIC_ERROR
     local rev_start="$since_commit"
   fi
 
   if [[ -n "$until_commit" ]]; then
     revision_exists "$until_commit" || error "unknown revision: $until_commit"
-    is_revision_reachable "$until_commit" || fatal "unreachable revision: $until_commit" $RET_GENERIC_ERROR
+    is_revision_reachable "$until_commit" "$source_revision" || fatal "unreachable revision: $until_commit" $RET_GENERIC_ERROR
     local rev_end="$until_commit"
   fi
 
   if [[ -n "$rev_start" ]] || [[ -n "$rev_end" ]]; then
     if [[ -z "$rev_start" ]]; then
-      local rev_start="$(find_root_commit)"
+      local rev_start="$(find_root_commit "$source_revision")"
     fi
 
-    local revision_range="$rev_start..$rev_end"
+    revision_range="$rev_start..$rev_end"
+  fi
+
+  if [[ -n "$source_revision" ]] && [[ -z "$revision_range" ]]; then
+    revision_range="$source_revision"
   fi
 
   local find_commits_opts=(--no-merges)
@@ -432,6 +464,13 @@ print_commits() {
   done
 }
 
+# whether or not to decorate commit messages
+# usage: should_decorate_messages
+# *intended for internal usage within this file
+should_decorate_messages() {
+  [[ "$decorate_messages" == "true" ]] || ([[ -z "$source" ]] && [[ "$decorate_messages" != "false" ]])
+}
+
 # perform revert/reapply operation
 # usage: do_revert_reapply <action>
 # *intended for internal usage within this file
@@ -460,7 +499,7 @@ do_revert_reapply() {
   local command_result
   local git_config=(-c "color.advice=always" -c "core.editor=$editor >$(tty)")
 
-  if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ]; then
+  if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ] && should_decorate_messages; then
     git_config+=(-c "core.hooksPath=$REAPPLY_HOOKS_PATH")
   fi
 
