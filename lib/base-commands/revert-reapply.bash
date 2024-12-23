@@ -21,13 +21,13 @@ readonly REAPPLY_HOOKS_PATH="$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../hooks/
 # *intended for internal usage within this file
 check_prerequisites() {
   check_git_command
-  check_git_repository
 }
 
 # check for the status of respoitory for auto-revert/reapply
 # usage: check_repository_status
 # *intended for internal usage within this file
 check_repository_status() {
+  check_git_repository
   check_ongoing_revert_or_cherry_pick "$action_name"
   check_uncommitted_changes "$action_name"
 }

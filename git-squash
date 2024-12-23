@@ -17,7 +17,7 @@ readonly EMPTY_STRAT_ABORT=abort
 abort_squash() {
   local current_head="$(resolve_revision "HEAD")"
 
-  if [[ "$current_head" != "$original_head" ]]; then
+  if [[ -n "$original_head" ]] && [[ "$current_head" != "$original_head" ]]; then
     git reset "$original_head" --hard >/dev/null 2>&1
 
     if [[ $? -eq 0 ]]; then
@@ -40,7 +40,6 @@ trap clean_up EXIT
 
 check_prerequisites() {
   check_git_command
-  check_git_repository
 }
 
 set_up() {
@@ -49,6 +48,7 @@ set_up() {
 }
 
 check_repository_status() {
+  check_git_repository
   check_ongoing_revert_or_cherry_pick "squash"
   check_uncommitted_changes "squash"
   check_ongoing_rebase "squash"
@@ -349,8 +349,8 @@ squash() {
 }
 
 check_prerequisites
-set_up
 parse_options "$@"
 check_repository_status
 
+set_up
 squash
