@@ -4,6 +4,7 @@ fi
 readonly __LIB_GIT_CORE__=true
 readonly __DIR_LIB_GIT_CORE__=$(dirname -- "${BASH_SOURCE[0]}")
 
+. "$__DIR_LIB_GIT_CORE__/config.bash"
 . "$__DIR_LIB_GIT_CORE__/revision.bash"
 . "$__DIR_LIB_GIT_CORE__/../core/error.bash"
 
@@ -94,7 +95,7 @@ check_ongoing_rebase() {
 # get current git author
 # usage: get_current_git_user
 get_current_git_user() {
-  echo "$(git config user.name) <$(git config user.email)>"
+  echo "$(get_git_config user.name) <$(get_git_config user.email)>"
 }
 
 # get root directory of the current git repository
@@ -155,7 +156,7 @@ readonly DEFAULT_GIT_EDITOR=vi
 # find editor used by git
 # usage find_git_editor
 find_git_editor() {
-  local config_editor="$(git config core.editor)"
+  local config_editor="$(get_git_config core.editor)"
 
   if [[ -n "$config_editor" ]]; then
     echo "$config_editor"
