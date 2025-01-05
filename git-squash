@@ -5,6 +5,7 @@ __DIR__=$(dirname -- "${BASH_SOURCE[0]}")
 
 . "$__DIR__/lib/core/error.bash"
 . "$__DIR__/lib/core/log.bash"
+. "$__DIR__/lib/git/config.bash"
 . "$__DIR__/lib/git/core.bash"
 . "$__DIR__/lib/git/log.bash"
 . "$__DIR__/lib/git/revision.bash"

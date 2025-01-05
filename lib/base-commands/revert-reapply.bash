@@ -6,6 +6,7 @@ readonly __DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__=$(dirname -- "${BASH_SOURCE[0]
 
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../core/error.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../core/log.bash"
+. "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/config.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/core.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/log.bash"
 . "$__DIR_LIB_BASE_COMMANDS_REVERT_REAPPLY__/../git/revision.bash"
