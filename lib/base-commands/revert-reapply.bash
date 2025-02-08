@@ -463,7 +463,7 @@ commit() {
   fi
 
   local editor="$(find_git_editor)"
-  local git_config=(-c "color.advice=always" -c "core.editor=$editor >$(tty)")
+  local git_config=(-c "color.advice=always" -c "core.editor=>$(tty) $editor")
 
   git "${git_config[@]}" commit -m "$message" "${commit_opts[@]}" >/dev/null
   local commit_result=$?
@@ -526,7 +526,7 @@ do_revert_reapply() {
 
   local command_err
   local command_result
-  local git_config=(-c "color.advice=always" -c "core.editor=$editor >$(tty)")
+  local git_config=(-c "color.advice=always" -c "core.editor=>$(tty) $editor")
 
   if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ] && should_decorate_messages; then
     git_config+=(-c "core.hooksPath=$REAPPLY_HOOKS_PATH")
