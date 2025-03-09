@@ -547,7 +547,7 @@ do_revert_reapply() {
     while [ $command_result -ne 0 ] && is_skippable; do
       todo=$(get_next_todo)
 
-      command_err="$(git "${git_config[@]}" $git_command_name --skip 2>&1 >/dev/null)"
+      command_err="$(git "${git_config[@]}" $git_command_name --skip "${command_opts[@]}" 2>&1 >/dev/null)"
       command_result=$?
 
       local todo_parts
