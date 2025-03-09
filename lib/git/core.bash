@@ -30,7 +30,7 @@ readonly __DIR_LIB_GIT_CORE__=$(dirname -- "${BASH_SOURCE[0]}")
 # check if git command is available, fail with a fatal error if not
 # usage: check_git_command
 check_git_command() {
-  git -v >/dev/null 2>&1 || fatal "git not available" "$RET_GIT_NOT_AVAILABLE"
+  command -v git >/dev/null 2>&1 || fatal "git not available" "$RET_GIT_NOT_AVAILABLE"
 }
 
 # check if the current workdir belongs to a git repository, fail with a fatal error if not
