@@ -6,9 +6,9 @@ A set of custom Git commands that might come in handy for certain tasks.
 
 Before installing Git Tools, ensure your system meets the following requirements:
 
-- __Bash__: This project is intended to run in a Bash shell. Most Unix-based systems (Linux, macOS) come with Bash pre-installed.
+- __A POSIX-compliant shell__: This project is intended to run in a POSIX-compliant shell, such as Bash and Zsh.
 
-- __Git v2.22+__: Git Tools requires [Git](https://git-scm.com/downloads) version 2.22 or higher.
+- __Git v2.23+__: Git Tools requires [Git](https://git-scm.com/downloads) version 2.23 or higher.
 
 ## Installation
 
