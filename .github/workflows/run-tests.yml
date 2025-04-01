@@ -46,7 +46,7 @@ jobs:
           git config --global user.email "test.runner@example.com"
           git config --global init.defaultBranch main
       - name: Execute tests
-        shell: bash
+        shell: pwsh
         run: |
           if bats tests/; then
             echo "✅ All tests passed successfully!"
