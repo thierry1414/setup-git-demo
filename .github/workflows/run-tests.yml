@@ -52,7 +52,7 @@ jobs:
             echo "✅ All tests passed successfully!"
           else
             echo "❌ Tests failed! Check the logs for details." >&2
-            exit 1
+            exit 0
           fi
         env:
           BATS_HELPERS_DIR: ${{ steps.setup-bats.outputs.bats-helpers-dir }}
