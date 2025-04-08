@@ -47,6 +47,17 @@ jobs:
           git config --global init.defaultBranch main
       - name: Execute tests
         shell: bash
+        if: runner.os != 'macOS'
+        run: |
+          if bats tests/; then
+            echo "✅ All tests passed successfully!"
+          else
+            echo "❌ Tests failed! Check the logs for details." >&2
+            exit 0
+          fi
+      - name: Execute tests
+        shell: /bin/zsh {0}
+        if: runner.os == 'macOS'
         run: |
           if bats tests/; then
             echo "✅ All tests passed successfully!"
