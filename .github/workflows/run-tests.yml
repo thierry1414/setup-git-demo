@@ -56,3 +56,4 @@ jobs:
           fi
         env:
           BATS_HELPERS_DIR: ${{ steps.setup-bats.outputs.bats-helpers-dir }}
+          BATS_TEST_TIMEOUT: 10
