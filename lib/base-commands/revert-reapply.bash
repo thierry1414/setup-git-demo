@@ -468,8 +468,8 @@ commit() {
     commit_opts+=(--no-edit)
   fi
 
-  local temp_output
-  create_temp_output 1 temp_output
+  local temp_output temp_output_pid
+  create_temp_output 1 temp_output temp_output_pid
 
   local editor="$(redirected_git_editor "$temp_output")"
   local git_config=(-c "color.advice=always" -c "core.editor=$editor")
@@ -477,7 +477,7 @@ commit() {
   git "${git_config[@]}" commit -m "$message" "${commit_opts[@]}" 3>&1 >/dev/null
   local commit_result=$?
 
-  close_temp_output $temp_output
+  close_temp_output $temp_output $temp_output_pid
 
   if [ $commit_result -ne 0 ]; then
     exit $command_result
@@ -534,7 +534,8 @@ do_revert_reapply() {
   fi
 
   local temp_output
-  create_temp_output 1 temp_output
+  local temp_output_pid
+  create_temp_output 1 temp_output temp_output_pid
 
   local editor="$(redirected_git_editor "$temp_output")"
 
@@ -564,7 +565,7 @@ do_revert_reapply() {
     done
   fi
 
-  close_temp_output $temp_output
+  close_temp_output $temp_output $temp_output_pid
 
   local numdone=$((${#commit_hashes[@]} - ${#skipped_commit_hashes[@]}))
 
