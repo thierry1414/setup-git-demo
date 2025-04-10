@@ -37,7 +37,7 @@ is_cygwin() {
 # check if the given value refers to an open file descriptor
 # usage: is_open_fd possible_fd
 is_open_fd() {
-  command >&"$1"
+  [[ $1 =~ ^[0-9]+$ ]] && command >&"$1"
 }
 
 # check if current shell supports dynamic fd allocation
