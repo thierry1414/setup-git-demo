@@ -228,19 +228,19 @@ commit() {
   local temp_output
   create_temp_output 1 temp_output
 
-  local editor="$(find_git_editor)"
-  local git_config=(-c "core.editor=$(redirected_git_editor $temp_output)")
+  local editor="$(redirected_git_editor "$temp_output")"
+  local git_config=(-c "core.editor=$editor")
 
   local commit_result
 
   git "${git_config[@]}" commit "${commit_opts[@]}" >/dev/null
   commit_result=$?
 
+  close_temp_output $temp_output
+
   if [[ $commit_result -ne 0 ]]; then
     fatal "unable to commit" $RET_GENERIC_ERROR
   fi
-
-  close_temp_output $temp_output
 }
 
 build_commit_message() {

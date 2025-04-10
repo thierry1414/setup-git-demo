@@ -468,11 +468,16 @@ commit() {
     commit_opts+=(--no-edit)
   fi
 
-  local editor="$(find_git_editor)"
-  local git_config=(-c "color.advice=always" -c "core.editor=>&3 $editor")
+  local temp_output
+  create_temp_output 1 temp_output
+
+  local editor="$(redirected_git_editor "$temp_output")"
+  local git_config=(-c "color.advice=always" -c "core.editor=$editor")
 
   git "${git_config[@]}" commit -m "$message" "${commit_opts[@]}" 3>&1 >/dev/null
   local commit_result=$?
+
+  close_temp_output $temp_output
 
   if [ $commit_result -ne 0 ]; then
     exit $command_result
@@ -528,11 +533,14 @@ do_revert_reapply() {
     command_opts+=(--no-edit)
   fi
 
-  local editor="$(find_git_editor)"
+  local temp_output
+  create_temp_output 1 temp_output
+
+  local editor="$(redirected_git_editor "$temp_output")"
 
   local command_err
   local command_result
-  local git_config=(-c "color.advice=always" -c "core.editor=>&3 $editor")
+  local git_config=(-c "color.advice=always" -c "core.editor=$editor")
 
   if [ "$revert_reapply_action" == "$ACTION_REAPPLY" ] && should_decorate_messages; then
     git_config+=(-c "core.hooksPath=$REAPPLY_HOOKS_PATH")
@@ -555,6 +563,8 @@ do_revert_reapply() {
       skipped_commit_hashes+=($(resolve_revision ${todo_parts[1]}))
     done
   fi
+
+  close_temp_output $temp_output
 
   local numdone=$((${#commit_hashes[@]} - ${#skipped_commit_hashes[@]}))
 
