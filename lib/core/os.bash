@@ -40,31 +40,65 @@ is_open_fd() {
   command >&"$1"
 }
 
+# allocate new file descriptor dynamically
+# usage: alloc_new_fd target out_param
+# note: the value of out_param must not be "__fd__", as this name is used internally.
+alloc_new_fd() {
+  local __fd__
+
+  if is_open_fd "$1"; then
+    exec {__fd__}>&"$1" 2>/dev/null
+  else
+    exec {__fd__}>"$1" 2>/dev/null
+  fi
+
+  if [ $? -eq 0 ]; then
+    eval "$2=\"$__fd__\""
+    return
+  fi
+
+  # fallback implementation for Bash versions prior to 4.1
+  for i in $(seq 10 100); do
+    if ! (: <&$i) 2>/dev/null && ! (: >&$i) 2>/dev/null; then
+      eval "exec $i>&" 2>/dev/null
+
+      if is_open_fd "$1"; then
+        eval "exec $i>&$1" 2>/dev/null
+      else
+        eval "exec $i>$1" 2>/dev/null
+      fi
+
+      if [ $? -eq 0 ]; then
+        __fd__=$i
+        break
+      fi
+    fi
+  done
+
+  eval "$2=\"$__fd__\""
+}
+
 # create temporary output for writing which is redirected to the given target
 # and return the file descriptor or file name
 # usage: create_temporary_output target out_param
-# note: the value of out_param must not be "__fd__", as this name is used internally.
+# note: the value of out_param must not be "__out__", as this name is used internally.
 create_temporary_output() {
-  local __fd__
+  local __out__
 
   if is_mingw || is_cygwin; then
-    __fd__="$(mktemp -d)/fifo"
-    mkfifo -m 0600 "$__fd__"
+    __out__="$(mktemp -d)/fifo"
+    mkfifo -m 0600 "$__out__"
 
     if is_open_fd "$1"; then
-      cat "$__fd__" >&"$1" &
+      cat "$__out__" >&"$1" &
     else
-      cat "$__fd__" >"$1" &
+      cat "$__out__" >"$1" &
     fi
   else
-    if is_open_fd "$1"; then
-      exec {__fd__}>&"$1"
-    else
-      exec {__fd__}>"$1"
-    fi
+    alloc_new_fd __out__ "$1"
   fi
 
-  eval "$2=\"$__fd__\""
+  eval "$2=\"$__out__\""
 }
 
 # close temporary output
