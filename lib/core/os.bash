@@ -40,49 +40,51 @@ is_open_fd() {
   command >&"$1"
 }
 
+# check if current shell supports dynamic fd allocation
+# usage: supports_dynamic_fd_allocation
+supports_dynamic_fd_allocation() {
+  (exec {__fd__}>&1) 2>/dev/null
+}
+
 # allocate new file descriptor dynamically
 # usage: alloc_new_fd target out_param
 # note: the value of out_param must not be "__fd__", as this name is used internally.
 alloc_new_fd() {
   local __fd__
 
-  if is_open_fd "$1"; then
-    exec {__fd__}>&"$1" 2>/dev/null
-  else
-    exec {__fd__}>"$1" 2>/dev/null
-  fi
-
-  if [ $? -eq 0 ]; then
-    eval "$2=\"$__fd__\""
-    return
-  fi
-
-  # fallback implementation for Bash versions prior to 4.1
-  for i in $(seq 10 100); do
-    if ! (: <&$i) 2>/dev/null && ! (: >&$i) 2>/dev/null; then
-      eval "exec $i>&" 2>/dev/null
-
-      if is_open_fd "$1"; then
-        eval "exec $i>&$1" 2>/dev/null
-      else
-        eval "exec $i>$1" 2>/dev/null
-      fi
-
-      if [ $? -eq 0 ]; then
-        __fd__=$i
-        break
-      fi
+  if supports_dynamic_fd_allocation; then
+    if is_open_fd "$1"; then
+      exec {__fd__}>&"$1" 2>/dev/null
+    else
+      exec {__fd__}>"$1" 2>/dev/null
     fi
-  done
+  else
+    # fallback implementation for older Bash versions that don't support dynamic fd allocation
 
+    for i in $(seq 10 100); do
+      if ! (: <&$i) 2>/dev/null && ! (: >&$i) 2>/dev/null; then
+        if is_open_fd "$1"; then
+          eval "exec $i>&$1" 2>/dev/null
+        else
+          eval "exec $i>$1" 2>/dev/null
+        fi
+
+        if [ $? -eq 0 ]; then
+          __fd__=$i
+          break
+        fi
+      fi
+    done
+  fi
+  
   eval "$2=\"$__fd__\""
 }
 
 # create temporary output for writing which is redirected to the given target
 # and return the file descriptor or file name
-# usage: create_temporary_output target out_param
+# usage: create_temp_output target out_param
 # note: the value of out_param must not be "__out__", as this name is used internally.
-create_temporary_output() {
+create_temp_output() {
   local __out__
 
   if is_mingw || is_cygwin; then
@@ -95,20 +97,20 @@ create_temporary_output() {
       cat "$__out__" >"$1" &
     fi
   else
-    alloc_new_fd __out__ "$1"
+    alloc_new_fd "$1" __out__
   fi
 
   eval "$2=\"$__out__\""
 }
 
 # close temporary output
-# usage: close_temporary_output out
-close_temporary_output() {
+# usage: close_temp_output out
+close_temp_output() {
   local out="$1"
 
   if is_mingw || is_cygwin; then
     rm "$out"
   else
-    exec {out}>&-
+    eval "exec $out<&-"
   fi
 }

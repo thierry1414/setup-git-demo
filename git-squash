@@ -226,7 +226,7 @@ commit() {
   local commit_opts=("$@")
 
   local temp_output
-  create_temporary_output 1 temp_output
+  create_temp_output 1 temp_output
 
   local editor="$(find_git_editor)"
   local git_config=(-c "core.editor=$(redirected_git_editor $temp_output)")
@@ -240,7 +240,7 @@ commit() {
     fatal "unable to commit" $RET_GENERIC_ERROR
   fi
 
-  close_temporary_output $temp_output
+  close_temp_output $temp_output
 }
 
 build_commit_message() {
