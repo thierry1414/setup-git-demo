@@ -82,8 +82,8 @@ alloc_new_fd() {
 
 # create temporary output for writing which is redirected to the given target
 # and return the file descriptor or file name
-# usage: create_temp_output target out_param
-# note: the value of out_param must not be "__out__", as this name is used internally.
+# usage: create_temp_output target out_param out_pid
+# note: the values of out_param and out_listener_process must not be "__out__", as this name is used internally.
 create_temp_output() {
   local __out__
 
@@ -93,8 +93,10 @@ create_temp_output() {
 
     if is_open_fd "$1"; then
       cat "$__out__" >&"$1" &
+      eval "$3=$!"
     else
       cat "$__out__" >"$1" &
+      eval "$3=$!"
     fi
   else
     alloc_new_fd "$1" __out__
@@ -104,12 +106,14 @@ create_temp_output() {
 }
 
 # close temporary output
-# usage: close_temp_output out
+# usage: close_temp_output out out_pid
 close_temp_output() {
   local out="$1"
+  local pid="$2"
 
   if is_mingw || is_cygwin; then
     rm "$out"
+    kill -15 $pid
   else
     eval "exec $out<&-"
   fi
